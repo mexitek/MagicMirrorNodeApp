@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="row mirror-widget">
+    <div class="col-md-10 content-area"></div>
+    <div class="col-md-2">
+      <% for(var index in rows) { var channel = rows[index].left; %>
+        <div class="weather-degrees">
+          <span class="weather-icon" data-icon="<%= channel.item.condition.character%>" />
+          <%= channel.item.condition.temp%>
+        </div>
+        <div class="weather-location">
+          <span><%= channel.location.city%>, <%= channel.location.region%></span>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<script>
+  var socket = io("localhost:4000");
+  
+  socket.on('showme', function(data){
+    console.log('message: ' + JSON.stringify(data));
+    var state = data.state;
+    var html="";
+    if(state.images) {
+      resizer = "http://i.embed.ly/1/image/resize?key=cb0afdc785b947b0b862d215349fe973&height=300&grow=true&url=";
+      htmlImages = '<div class="row">';
+      
+      for(i=0; i<state.images.length; i++) {
+        encodedUrl = encodeURIComponent(state.images[i].unescapedUrl);
+        htmlImages +=  '<div class="image-holder">\
+                            <img src="'+resizer+encodedUrl+'">\
+                        </div>';
+      }
+      
+      htmlImages +=   '</div>';
+    } else {
+      htmlImages = "";
+    }
+
+    if(state.displayText) {
+      html = "<h1>"+state.displayText+"</h1>";
+    }
+
+    $(".content-area").html(html+htmlImages);
+  });
+</script>
+<html>
